@@ -1,0 +1,107 @@
+//---------------------------以下是上传到jcenter时需要生成的文件。----------------------------------
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+// classpath : groupid :artifactId :version
+//-----------------------完整配置 start------------------
+def myArtifactid = 'inject'  // 这个名字必须和jcenter创建的仓库里面的packge name一样
+group 'com.nzh.plugin'
+def myversion = '1.1.6'
+def jcenter_login_name = 'nzh2018'
+def jcenter_api_key = '357e94f2332293ce63f189c7a7e09fcb03d9eb93'
+def vcs = 'https://dl.bintray.com/nzh2018/gradle_plugin' //仓库地址
+def describe = 'this is a gradle plugin to inject view in android.'
+def repo_name = 'gradle_plugin'
+//-----------------------配置 end------------------
+
+// 源代码打包任务：继承于Jar任务 ，打出jar包
+task my_sourcejar(type: Jar) {
+
+    baseName 'test'
+    classifier 'sources'  // 分类器，用来区分其他jar包
+    from sourceSets.main.allSource
+}
+// 文档打包任务：需要依赖其他任务 javadoc , groovydoc
+task my_docjar(type: Jar, dependsOn: [javadoc, groovydoc]) {
+
+    baseName 'test'
+    classifier 'doc'  // 分类器，用来区分其他jar包
+    // javadoc 任务来自于java-library 插件
+    // groovydoc 任务来自于groovy插件
+    from javadoc.destinationDir, groovydoc.destinationDir
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+tasks.withType(Javadoc) {
+    options.encoding = "UTF-8"
+}
+
+artifacts {
+    archives my_sourcejar
+    archives my_docjar
+}
+
+publishing {
+    publications {
+        nzhplugin(MavenPublication) {
+            from components.java
+            artifactId myArtifactid
+            artifact my_sourcejar   // 添加上传的文件（my_sourcejar任务的执行结果）
+            artifact my_docjar
+            version myversion
+            // 配置pox.xml 文件
+            pom.withXml {
+                def root = asNode()
+                def licencesNode = root.appendNode('licenses').appendNode('license')
+                licencesNode.appendNode('name', 'Apache License, Version 2.0')
+                licencesNode.appendNode('url', 'https://www.apache.org/licenses/LICENSE-2.0.txt')
+                licencesNode.appendNode('distribution', 'repo')
+                licencesNode.appendNode('comments', 'A business-friendly OSS license')
+            }
+        }
+    }
+}
+//--------------------------------------以下是上传配置---------------------------------------------
+// 使用bintray 官方提供的 插件来上传代码
+// 根据gradle 版本不同 使用不同的配置。
+// 参见；https://github.com/bintray/gradle-bintray-plugin
+
+// 0：获取api_key 和 创建仓库
+// 1
+// 2
+
+bintray {
+    user = jcenter_login_name   // bintray网站的用户名
+    key = jcenter_api_key // api_key
+    //5
+    publications = ['nzhplugin']
+    publish true
+    override = true
+    //3
+    pkg {
+        repo = repo_name    // 上传至仓库的名称
+        name = myArtifactid // 上传的项目名称
+        userOrg = jcenter_login_name // 个人账号如果不配置就是 user的配置，也就是nzh2018。
+        licenses = ['Apache-2.0']   // 和 bintray 网站上创建仓库时指定的开源协议一致。
+//         vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git' // 不配置也可以
+        vcsUrl = vcs // 必须配置，不然jcenter 上的package不能自动创建
+        desc = describe
+        // 4
+        version {
+            name = myversion  // 必须配置.
+            desc = '这是一个初始化view的gradle 插件'  // 描述
+            released = new Date()   //发布日期
+            vcsTag = vcs
+            // 随便配置，不写也可以
+            attributes = ['gradle-plugin': 'com.nzh.gradle:view-init-plugin']
+        }
+    }
+}
+
+//----------------------------------以下是上传操作-------------------------------------------
+//打开 gradle 视图
+// 1： 先执行 publishNzhpluginPublicationToMavenLocal 任务 生成jar,doc,pom等文件。
+// 2： 找到 :plugin2view /Tasks/ publishing/ bintrayUpload 任务。执行这个上传任务。
+
+

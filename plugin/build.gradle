@@ -1,0 +1,38 @@
+apply plugin: 'java-library'
+// 1:引入groovy插件支持
+apply plugin: 'groovy'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    //2:引入gradle api 支持
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.android.tools.build:gradle:3.0.1'
+    // gradle 3.0 以下用：provided  files('libs/javassist.jar')
+    // 方式一
+//     compile  files('libs/javassist.jar')
+    // 方式二：
+    compile 'org.javassist:javassist:3.22.0-GA'
+}
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+//---------------------------以下是上传到jcenter时需要生成的文件。----------------------------------
+// 1: 上传到jcenter
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    }
+}
+
+apply from: 'publish--plugin-2-jcenter.gradle'
+
+
+
+// 2:上传到本地仓库
+//apply from: 'publish--plugin-2-local.gradle'

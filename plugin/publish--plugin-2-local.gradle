@@ -1,0 +1,21 @@
+//---------------------------以下是上传到jcenter时需要生成的文件。----------------------------------
+
+// classpath : groupid :artifactId :version
+//-----------------------配置 start------------------
+def myArtifactid = 'inject'  // 这个名字必须和jcenter创建的仓库里面的packge name一样
+group 'com.nzh.plugin'
+version '1.1.1'
+//-----------------------配置 end------------------
+
+
+apply plugin: 'maven-publish'
+publishing {
+    publications {
+        plugin(MavenPublication) {
+            from components.java
+            artifactId myArtifactid
+        }
+    }
+}
+
+//--------------------------------------以下是上传配置---------------------------------------------

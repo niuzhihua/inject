@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="lsn.javassit.nzh.com.javassit.MainActivity">
+
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+       />
+
+
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/btn2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="to_Activity_Test2"
+        android:onClick="to_Activity_Test2"
+       />
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/btn3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="to_Activity_Test3"
+        android:onClick="to_Activity_Test3"
+       />
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/btn4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="to_AppCompatActivity_Test4"
+        android:onClick="to_AppCompatActivity_Test4"
+       />
+
+</LinearLayout>

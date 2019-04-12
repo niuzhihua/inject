@@ -1,0 +1,5 @@
+class MyExtensions {
+
+    def onlyInjectWithAnnotaion
+
+}

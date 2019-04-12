@@ -1,0 +1,139 @@
+
+将gradle 插件上传到Jcenter
+
+1:上传到jcenter 需要上传源码 （source.jar），文档(doc.jar)，和 pox.xml配置文件
+
+2：jcenter 注册以后 就需要添加一个仓库，用来上传代码。由于注册的是个人账号。所以创建的仓库
+    只能是 public 的。
+
+    click "Add New Repository"
+
+3: 上传代码：  使用如下配置也可以上传代码。但是比较麻烦。bintray 官方给我们提供了一个插件。方便上传代码。
+
+    publishing {
+        publications {
+            plugin(MavenPublication) {
+                from components.java
+                artifactId 'test_artifactid'
+                artifact my_sourcejar   // 添加上传的文件（my_sourcejar任务的执行结果）
+                artifact my_docjar
+                // 配置pox.xml 文件
+                pom.withXml {
+                    def root = asNode()
+                    def licencesNode = root.appendNode('licenses').appendNode('license')
+                    licencesNode.appendNode('name', 'Apache License, Version 2.0')
+                    licencesNode.appendNode('url', 'https://www.apache.org/licenses/LICENSE-2.0.txt')
+                    licencesNode.appendNode('distribution', 'repo')
+                    licencesNode.appendNode('comments', 'A business-friendly OSS license')
+                }
+            }
+        }
+    }
+
+    这个插件在 github 上。  搜索 gradle-bintray-plugin 即可。
+
+    https://github.com/bintray/gradle-bintray-plugin
+
+
+4: resources目录名不要写错，注意java.groovy .resources 目录名如果对的话都会变色。
+
+5: 需要手动在jcenter 上创建仓库  然后再上传.
+
+6：新项目首次上传后 记得publish，在没有审核通过以前 采用 如下方式引入。
+    buildscript {
+        repositories {
+    //        mavenLocal()
+            maven{
+                url 'https://dl.bintray.com/nzh2018/my_plugin_repo'
+            }
+        }
+        dependencies {
+            classpath 'com.nzh.plugin:inject:1.0'
+        }
+    }
+    apply plugin: 'com.nzh.plugin'
+
+6.5 ： 如果本java lib 需要用到第三方jar,那么 在打包时当然也需要 把第三方jar打进去。
+
+        jar{   // 如果不添加这个配置，则javassist就不会被打包进jar包，上传到仓库后就是错的jar.运行时报错。
+
+            from file('libs/javassist.jar')
+        }
+
+ 7: 异常处理：
+
+        javassist.CannotCompileException: [source error] 方法名/变量 。。。 not found in  类 ；
+
+        这个异常原因是  当前方法或者变量 不存在于当前类中，可能在父类中  或者代理类中 。
+        那么在生成代码时 要注意编译方法或者变量 时 是否 都把 需要的类 假如 ClassPool 了。
+
+        例如:
+
+            Activity --->findViewById 方法定义在 android.app.Activity类中。
+            编译 findViewById 时 只需要 android.jar 包就可以了。
+
+
+            AppCompatActivity  --->findViewById ：
+            @Override
+                public <T extends View> T findViewById(@IdRes int id) {
+                     // AppCompatDelegate.getDelegate() .
+                    return getDelegate().findViewById(id);
+                }
+            AppCompatDelegate 类在V7 包中， 编译 findViewById 时 需要 android.jar 和 V7 包 才可以。
+            不然会报javassist.CannotCompileException 异常，提示 findViewById 方法找不到。
+
+
+            解决： 由于AppCompatActivity 最终 extentds Activity. 所以可以统一用 Activity 即可。
+
+            onCreate{
+
+                Activity a = this;
+                a.findViewById(123456789);
+            }
+
+8: 1：上传项目成功后 ，点击 publish 发布，这时就可以用如下方式引入了 ：
+
+                maven{
+                    url 'https://dl.bintray.com/nzh2018/my_plugin_repo'
+                }
+    2：如果要只写 jcenter() 那么还得需要等待审核通过：
+
+
+
+    3： 审核通过后 才能覆盖上传。
+
+9： 遇到的问题：
+
+        1： add to jcenter 后 提示 ： package should include sources as part of the package
+            解决：
+            publishing {
+                publications {
+                    nzhplugin(MavenPublication) {
+                        // 这个要配置对
+                        version myversion
+                        }
+                    }
+                }
+
+                bintray {
+                    pkg {
+                        // 这个要配置对
+                        name = myversion
+                        // 这个要配置对
+                        vcsUrl = vcs
+                        version {
+                            // 这个要配置对
+                             vcsTag = vcs
+                        }
+                    }
+                }
+
+
+
+
+
+
+
+
+
+

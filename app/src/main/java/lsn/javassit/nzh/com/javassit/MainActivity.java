@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.nzh.plugin.api.BindView;
+
 public class MainActivity extends AppCompatActivity {
 
 

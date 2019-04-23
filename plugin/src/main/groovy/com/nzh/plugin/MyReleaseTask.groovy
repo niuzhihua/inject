@@ -10,22 +10,15 @@ class MyReleaseTask extends DefaultTask {
         description '操作字节码任务'
     }
 
-    String buildDir
-    String androidLib
-
-    void init(String buildDir, String androidLib) {
-        this.buildDir = buildDir
-        this.androidLib = androidLib
-    }
 
 
     @TaskAction
     void doMyRun() {
 
 
-        println('----MyReleaseTask------')
+        println('----MyReleaseTask----start--')
         Util.getInstance().release()
-
+        println('----MyReleaseTask----end--')
     }
 
 }

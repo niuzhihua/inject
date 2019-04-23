@@ -102,7 +102,7 @@
 
     3： 审核通过后 才能覆盖上传。
 
-9： 遇到的问题：
+9： 上传jcenter 后不能自动创建package 原因：
 
         1： add to jcenter 后 提示 ： package should include sources as part of the package
             解决：
@@ -128,10 +128,38 @@
                     }
                 }
 
+10： add to jcenter 审核失败原因： 无效的 vsc 地址。
+Hi, JCenter requires that you have a valid version control link in your bintray package profile.
+Your package lacks a valid VCS link and therefore we cannot approve your inclusion request. Please provide a valid version control URL.
+
+    需要先将工程上传至一个有效的仓库（github）。 然后再填写 vcs地址 并上传。
 
 
 
+11 ：  插件的使用：
 
+    支持 @BindView  @OnClick 注解 直接在Activity,AppCompatActivity 中使用
+    支持 @BindView  @OnClick 注解 在父类为 Activity,AppCompatActivity 的 activity 中使用
+    支持Fragment ,支持ViewHolder，
+
+    1: 引入gradle插件
+    工程的build.gradle
+     dependencies {
+            classpath 'com.android.tools.build:gradle:3.0.1'
+            classpath 'com.nzh.plugin:inject:1.1.6'
+        }
+
+    2: 添加依赖 并使用插件
+
+    apply plugin: 'com.nzh.plugin'
+
+    dependencies {
+        implementation fileTree(dir: 'libs', include: ['*.jar'])
+        testImplementation 'junit:junit:4.12'
+        ....
+          //  在application 插件所在 module 中的build.gradle 里添加：
+        provided 'com.nzh.plugin:inject:1.1.6'
+    }
 
 
 

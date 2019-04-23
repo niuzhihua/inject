@@ -1,43 +1,15 @@
 package com.nzh.plugin
 
 import com.nzh.plugin.inject.InjectView2
+import com.nzh.plugin.util.Util
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class MyTask extends DefaultTask {
 
-    String buildDir
-    String androidLib
-
-    ArrayList<String> activityes
-    String packageName
-
-
     MyTask() {
         group 'myGroup'
         description '操作字节码任务'
-
-    }
-
-    void init(String buildDir, String androidLib, ArrayList<String> activityes, String packageName) {
-        this.buildDir = buildDir
-        this.androidLib = androidLib
-        this.activityes = activityes
-        this.packageName = packageName
-    }
-
-    void init(String buildDir, String androidLib, ArrayList<String> activityes) {
-        this.buildDir = buildDir
-        this.androidLib = androidLib
-        this.activityes = activityes
-    }
-
-    void setBuildDir(String buildDir) {
-        this.buildDir = buildDir
-    }
-
-    void setAndroidLib(String androidLib) {
-        this.androidLib = androidLib
     }
 
     @TaskAction
@@ -57,8 +29,14 @@ class MyTask extends DefaultTask {
 
 //        InjectView.injectView(buildDir, androidLib, activityes)
 
+        Util util = Util.getInstance()
+        String buildDir = util.getBuildDir()
+        String androidLibPath = util.getLibPath().get(0)
+        ArrayList<String> activities = util.getActivities()
+        String packageName = util.getPacakgeName()
+
         InjectView2 injectView = new InjectView2(InjectView2.InjectType.Only_Inject_By_Anno)
-        injectView.injectView(buildDir, androidLib, activityes, packageName)
+        injectView.injectView(buildDir, androidLibPath, activities, packageName)
 
         println '----MyTask end----'
     }

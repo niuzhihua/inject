@@ -3,9 +3,16 @@ package lsn.javassit.nzh.com.javassit;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.nzh.plugin.api.BindView;
+import com.nzh.plugin.api.OnClick;
+
+import javassist.CtClass;
+import javassist.CtMethod;
 
 public class Test3Activity extends Activity {
 

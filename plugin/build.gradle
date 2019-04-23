@@ -14,9 +14,14 @@ dependencies {
 //     compile  files('libs/javassist.jar')
     // 方式二：
     compile 'org.javassist:javassist:3.22.0-GA'
+
+    compile 'com.android.support:support-annotations:26.1.0'
+//    compile 'com.android.support:support-v4:26.1.0'
+
 }
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
 
 //---------------------------以下是上传到jcenter时需要生成的文件。----------------------------------
 // 1: 上传到jcenter

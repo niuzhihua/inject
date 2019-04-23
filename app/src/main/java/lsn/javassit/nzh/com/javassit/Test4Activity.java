@@ -10,6 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nzh.plugin.api.BindView;
+import com.nzh.plugin.api.OnClick;
+
 public class Test4Activity extends Activity implements View.OnClickListener{
 
     @BindView(R.id.text)

@@ -4,12 +4,9 @@ buildscript {
 
     repositories {
         mavenLocal()
+        mavenCentral()
         google()
         jcenter()
-        mavenCentral()
-        maven {
-            url 'https://dl.bintray.com/nzh2018/gradle_plugin'
-        }
 
     }
     dependencies {
@@ -22,9 +19,9 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
-        jcenter()
         mavenCentral()
+        jcenter()
+        google()
     }
 }
 

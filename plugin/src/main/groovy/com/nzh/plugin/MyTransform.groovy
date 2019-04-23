@@ -1,8 +1,11 @@
 package com.nzh.plugin
 
+import com.android.build.api.transform.DirectoryInput
+import com.android.build.api.transform.JarInput
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformException
+import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
@@ -11,6 +14,7 @@ import com.nzh.plugin.util.Util
 import groovy.xml.Namespace
 import javassist.ClassPool
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileTree
 
 // 我们自己注册的Transform 优先于gradle 内置的 Transform来先执行。
 class MyTransform extends Transform {
@@ -22,43 +26,43 @@ class MyTransform extends Transform {
     MyTransform(Project project, AppExtension android) {
         this.android = android
         this.project = project
-        def sdkDir = 'D:\\setup\\android_sdk\\android-sdk'
+        /*     def sdkDir = 'D:\\setup\\android_sdk\\android-sdk'
 
-        // 获取build生成目录
-        def buildDir = project.buildDir.absolutePath + File.separator + 'intermediates' + File.separator + 'classes' + File.separator + 'debug'
+             // 获取build生成目录
+             def buildDir = project.buildDir.absolutePath + File.separator + 'intermediates' + File.separator + 'classes' + File.separator + 'debug'
 
-//        def androidJarPath = sdkDir + File.separator + 'platforms' + File.separator + android.compileSdkVersion + File.separator + 'android.jar'
-        def androidJarPath = sdkDir + File.separator + 'platforms' + File.separator + 'android-26' + File.separator + 'android.jar'
+     //        def androidJarPath = sdkDir + File.separator + 'platforms' + File.separator + android.compileSdkVersion + File.separator + 'android.jar'
+             def androidJarPath = sdkDir + File.separator + 'platforms' + File.separator + 'android-26' + File.separator + 'android.jar'
 
-        // 获取清单文件
-        def manifestFile = android.sourceSets.main.manifest.srcFile
+             // 获取清单文件
+             def manifestFile = android.sourceSets.main.manifest.srcFile
 
-        // 解析清单文件
-        def parser = new XmlParser().parse(manifestFile)
-        def nameSpace = new Namespace('http://schemas.android.com/apk/res/android', 'android')
-        //获取application 节点
-        Node node = parser.application[0]
-        // 获取application下的四大组件等信息
-        List childs = node.children()
-        def packageName = 'lsn.javassit.nzh.com.javassit' // android.defaultConfig.applicationId
-        println('packageName:' + packageName)
-        ArrayList<String> activities = new ArrayList<>()
-        for (Node child : childs) {
-            if ('activity'.equals(child.name())) {
-                String activityName = child.attributes()[nameSpace.name]
-                if (activityName.contains(packageName)) {
-                    activities.add(activityName)
-                } else {
-                    activities.add(packageName + activityName)
-                }
-            }
-        }
+             // 解析清单文件
+             def parser = new XmlParser().parse(manifestFile)
+             def nameSpace = new Namespace('http://schemas.android.com/apk/res/android', 'android')
+             //获取application 节点
+             Node node = parser.application[0]
+             // 获取application下的四大组件等信息
+             List childs = node.children()
+             def packageName = 'lsn.javassit.nzh.com.javassit' // android.defaultConfig.applicationId
+             println('packageName:' + packageName)
+             ArrayList<String> activities = new ArrayList<>()
+             for (Node child : childs) {
+                 if ('activity'.equals(child.name())) {
+                     String activityName = child.attributes()[nameSpace.name]
+                     if (activityName.contains(packageName)) {
+                         activities.add(activityName)
+                     } else {
+                         activities.add(packageName + activityName)
+                     }
+                 }
+             }
 
-        println('buildDir:' + buildDir)
-        println('androidJarPath:' + androidJarPath)
-        println('activities:' + activities.size())
-        println('packageName:' + packageName)
-        init(buildDir, androidJarPath, activities, packageName)
+             println('buildDir:' + buildDir)
+             println('androidJarPath:' + androidJarPath)
+             println('activities:' + activities.size())
+             println('packageName:' + packageName)
+             init(buildDir, androidJarPath, activities, packageName)*/
     }
 
     String buildDir
@@ -122,24 +126,27 @@ class MyTransform extends Transform {
 
         println '---执行自定义transform------'
 
-/*        // 获取transform所有的输入
+        // 获取transform所有的输入
         Collection<TransformInput> inputs = transformInvocation.getInputs()
 
         // 从inputs 中又可以拿到2个输入： 目录输入 , (jar)文件输入
 
-        for(TransformInput input:inputs){
+        for (TransformInput input : inputs) {
 
             // 我们自己写的代码的输入。
             Collection<DirectoryInput> dirInputs = input.getDirectoryInputs()
+            dirInputs.each {
+                println('dirInputs name:' + it.name + "-path:" + it.file.absolutePath)
+
+            }
 
             // 所有的jar输入，包括第三方jar. 除了我们自己写的代码之外，
             Collection<JarInput> jarInputs = input.jarInputs
+            jarInputs.each {
 
-        }*/
+            }
 
-        ///
-
-        writeMyClass()
+        }
 
 //        TransformOutputProvider outputProvider = transformInvocation.outputProvider
 //

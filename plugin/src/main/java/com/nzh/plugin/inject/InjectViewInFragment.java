@@ -1,8 +1,8 @@
 package com.nzh.plugin.inject;
 
 
-import com.nzh.plugin.util.ActivityExprEditor;
 import com.nzh.plugin.MyFieldInfo;
+import com.nzh.plugin.util.FragmentExprEditor;
 import com.nzh.plugin.util.SuperClassExprEditor;
 import com.nzh.plugin.util.Util;
 
@@ -30,65 +30,31 @@ import javassist.compiler.Javac;
 import static com.nzh.plugin.Const.BINDVIEW_ANNOTATION;
 import static com.nzh.plugin.Const.METHOD_NAME;
 import static com.nzh.plugin.Const.METHOD_OnCreate;
-
-/**
- * BindView 注解的实现 。
- */
-public class InjectView2 {
-
-    private static final String view = "android.app.Activity a = this;";
-    private static final String template = " a.findViewById(";
+import static com.nzh.plugin.Const.METHOD_OnCreateView;
+import static com.nzh.plugin.Const.NZH_Gen_Method;
+import static com.nzh.plugin.Const.NZH_Gen_Method_Body;
 
 
-    InjectType type;
+public class InjectViewInFragment {
 
-    public InjectView2(InjectType type) {
-        this.type = type;
-    }
 
-    public enum InjectType {
-        /**
-         * 仅初始化带注解的View
-         */
-        Only_Inject_By_Anno,
-        /**
-         * (暂时废弃)初始化带注解的View 和 id 和View名一致的   view.
-         */
-        Inject_By_Anno_And_ViewName
+    public InjectViewInFragment() {
 
     }
 
-    /**
-     * 可以初始化带注解的View 和 id 和View名一致的   view.
-     *
-     * @param buildClassDir  要操作的字节码目录。（绝对路径）
-     * @param androidLibPath 造作字节码时用到的 android.jar 的路径。（绝对路径）
-     * @param activities     所有activity的全类名。
-     * @param packageName    包名。
-     * @throws Exception e
-     */
-    public void injectView(String buildClassDir, String androidLibPath, ArrayList<String> activities, String packageName) throws Exception {
+
+    public void injectView(String buildClassDir, String packageName, ArrayList<String> fragmentList) throws Exception {
 
         final String myClassPath = buildClassDir;
-        String myClassLibPath = androidLibPath;
 
-//        ClassPool pool = ClassPool.getDefault();
-//        pool.insertClassPath(myClassPath);
-//        pool.insertClassPath(myClassLibPath);
-//        Util util = Util.init(pool);
         Util util = Util.getInstance();
         ClassPool pool = util.getClassPool();
-
-
-        //1： 遍历所有 Activity 类
-        for (String activity : activities) {
-
-            String dstClass = activity;
-            final CtClass ctClass = pool.get(dstClass);
-
-            String annotationClassName = BINDVIEW_ANNOTATION;
-            String annotationMethodName = "value";
-
+        String annotationClassName = BINDVIEW_ANNOTATION;
+        String annotationMethodName = "value";
+        // 1 : 遍历所有Fragment
+        for (String fragment : fragmentList) {
+            System.out.println("---s---" + fragment);
+            CtClass ctClass = pool.get(fragment);
             //2: 遍历field ,找到 每个Activity类中的注解
             CtField[] fields = ctClass.getDeclaredFields();
 
@@ -107,25 +73,13 @@ public class InjectView2 {
                     // 只处理View 类和其子类
                     continue;
                 }
-
                 MyFieldInfo fieldInfo;
-
                 FieldInfo info = field.getFieldInfo();
                 AnnotationsAttribute annotationAttr = (AnnotationsAttribute) info.getAttribute(AnnotationsAttribute.invisibleTag);
-
-                // 没有使用@BindView 注解
-                if (annotationAttr == null) {
-                    if (type == InjectType.Only_Inject_By_Anno) {
-                        // 只处理 @BindView 注解的变量
-                        continue;
-                    }
-                }
-
-
                 if (annotationAttr != null) {
-                    System.out.println("annotationClassName"+annotationClassName);
+                    System.out.println("annotationClassName" + annotationClassName);
                     Annotation annotation = annotationAttr.getAnnotation(annotationClassName);
-                    System.out.println("annotation"+(annotation==null));
+                    System.out.println("annotation" + (annotation == null));
 
                     IntegerMemberValue intValue = (IntegerMemberValue) annotation.getMemberValue(annotationMethodName);
                     int value = intValue.getValue();
@@ -135,26 +89,26 @@ public class InjectView2 {
                 } else {
                     // 未使用BindView 注解，这时 View 的变量名 必须和 id名一致。
                     fieldInfo = new MyFieldInfo(fieldTypeName, field.getName());
-
                 }
                 list.add(fieldInfo);
             }
 
-            // 当前Activity没有需要注解的View
+            // 当前fragment没有需要注解的View
             if (list.size() == 0) {
                 continue;
             }
 
             // 4：生成一个方法。用来初始化view.
-            genMethodByNewMethod(ctClass, getMethodString2(list, METHOD_NAME, packageName));
+            genMethodByNewMethod(ctClass, getMethodString2(list, NZH_Gen_Method, packageName));
             // 5：不要忘记写入，写入 初始化view方法代码
             ctClass.debugWriteFile(myClassPath);
 
             final CtMethod ctMethod;
             try {
-                // 4.1： 没有异常表示 直接父类是 Activity 或者AppCompatActivity
-                // 优化 判断直接父类是否是 Activity 或者AppCompatActivity (怎么引入v7)
-                ctMethod = ctClass.getDeclaredMethod(METHOD_OnCreate);
+                // 4.1： 没有异常表示 直接父类是 Fragment 或者 V4 Fragment
+                // 优化 1:是否有必要 判断直接父类是否是 Activity 或者AppCompatActivity (怎么引入v7)
+                //   2： 像ButterKnife 一样 再提供一个api ： ButterKnife.bind(this)
+                ctMethod = ctClass.getDeclaredMethod(METHOD_OnCreateView);
 
             } catch (NotFoundException e) {
 //                e.printStackTrace();
@@ -191,12 +145,11 @@ public class InjectView2 {
                 continue;
             }
 
-            // 4.1 在OnCreate 方法中 添加 初始化view 方法的调用
-            ActivityExprEditor activityExprEditor = new ActivityExprEditor(ctClass, ctMethod, myClassPath);
-            ctMethod.instrument(activityExprEditor);
+            // 4.1 在OnCreateView 方法中 添加 初始化view 方法的调用
+            FragmentExprEditor fragmentExprEditor = new FragmentExprEditor(ctClass, ctMethod, myClassPath);
+            ctMethod.instrument(fragmentExprEditor);
 
         }
-
     }
 
     /**
@@ -237,7 +190,6 @@ public class InjectView2 {
     public String getMethodString2(ArrayList<MyFieldInfo> viewInfos, String methodName, String packageName) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(view);
         for (MyFieldInfo f : viewInfos) {
             String name = f.getFieldViewName();
             String type = f.getFieldViewType();
@@ -247,7 +199,7 @@ public class InjectView2 {
 
                 sb.append(name).
                         append("=").append("(").append(type).append(")").
-                        append(template).append(id).append(");").append("\r\n");
+                        append(NZH_Gen_Method_Body).append(id).append(");").append("\r\n");
             } else {
                 // key 和value 一样。也就是 view的 名称和id一样。
                 String idValue = name + "_"; // id 的值
@@ -255,12 +207,12 @@ public class InjectView2 {
                 sb.append(genId).append("\r\n").
                         append(name).
                         append("=").append("(").append(type).append(")").
-                        append(template).append(idValue).append(");").append("\r\n");
+                        append(NZH_Gen_Method_Body).append(idValue).append(");").append("\r\n");
             }
         }
         viewInfos.clear();
         String methodContent = sb.toString();
-        String s = "public void " + methodName + "(){#}";
+        String s = "public void " + methodName + "{#}";
         String method = s.replaceAll("#", methodContent);
         return method;
     }

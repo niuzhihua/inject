@@ -2,8 +2,8 @@ package lsn.javassit.nzh.com.javassit.fragment;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +14,7 @@ import com.nzh.plugin.api.BindView;
 import lsn.javassit.nzh.com.javassit.R;
 
 
-public class BlankFragment extends Fragment {
+public abstract class BaseFragment extends Fragment {
 
 
     private static final String ARG_PARAM1 = "param1";
@@ -24,36 +24,23 @@ public class BlankFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    @BindView(R.id.tv)
-    TextView tvHello;
 
-    public BlankFragment() {
+    public BaseFragment() {
         // Required empty public constructor
-    }
-
-
-    public static BlankFragment newInstance(String param1, String param2) {
-
-        BlankFragment fragment = new BlankFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return  inflater.inflate(R.layout.fragment_blank, container, false);
+        return inflater.inflate(getLayoutId(), container, false);
     }
 
+    public abstract int getLayoutId();
 
 
     @Override
     public void onResume() {
         super.onResume();
-        tvHello.setText("hello");
     }
 
 

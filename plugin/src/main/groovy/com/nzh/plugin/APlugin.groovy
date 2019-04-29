@@ -1,15 +1,18 @@
 package com.nzh.plugin
 
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.LibraryExtension
+import com.nzh.plugin.extension.MyExtensions
+import com.nzh.plugin.task.CleanCodeTask
+import com.nzh.plugin.task.DoInFragmentTask
+import com.nzh.plugin.task.MyReleaseTask
+import com.nzh.plugin.task.MyTask
+import com.nzh.plugin.task.SetListenerTask
 import com.nzh.plugin.util.Util
 import groovy.xml.Namespace
-import javassist.ClassClassPath
 import javassist.ClassPool
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.internal.FileUtils
 
 class APlugin implements Plugin<Project> {
 
@@ -34,10 +37,18 @@ class APlugin implements Plugin<Project> {
 
 //            println('---Transform-----')
 //            android.registerTransform(new MyTransform(project, android))
+//            if(buildDebug!=null){
+//                return
+//            }
 
             project.afterEvaluate {
 
-                println project.inject.onlyInjectWithAnnotaion
+                // 安排任务执行
+                def beforeGenDex = project.tasks.getByName('mergeDebugAssets')
+                if (beforeGenDex==null) {
+                    println '----unknown task mergeDebugAssets-----'
+                    return
+                }
 
                 def androidJar = sdkDir + File.separator + 'platforms' + File.separator + android.compileSdkVersion + File.separator + 'android.jar'
 
@@ -88,19 +99,19 @@ class APlugin implements Plugin<Project> {
                 def doInFragmentTask = project.tasks.create('doInFragmentTask', DoInFragmentTask)
                 // 是否资源 task
                 def myRelease = project.tasks.create('myRelease', MyReleaseTask)
+                // 清楚指定代码task
+                def cleanCodeTask = project.tasks.create('cleanCodeTask', CleanCodeTask)
 
                 // 初始化工具类
                 init(buildDebug, libsPath, activities, packageName, project)
-
-                // 安排任务执行
-                def beforeGenDex = project.tasks.getByName('mergeDebugAssets')
 
                 // 设置任务执行顺序：
                 // setListenerTask 先执行（这样 插入的监听代码在最后），然后执行myTask
                 beforeGenDex.finalizedBy setListenerTask
                 setListenerTask.finalizedBy myTask
                 myTask.finalizedBy doInFragmentTask
-                doInFragmentTask.finalizedBy myRelease
+                doInFragmentTask.finalizedBy cleanCodeTask
+                cleanCodeTask.finalizedBy myRelease
 
 
             }

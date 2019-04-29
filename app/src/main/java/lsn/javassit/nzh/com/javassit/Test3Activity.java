@@ -2,6 +2,7 @@ package lsn.javassit.nzh.com.javassit;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +15,7 @@ import com.nzh.plugin.api.OnClick;
 import javassist.CtClass;
 import javassist.CtMethod;
 
-public class Test3Activity extends Activity {
+public class Test3Activity extends AppCompatActivity {
 
     @BindView(R.id.name)
     TextView mName;

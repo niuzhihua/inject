@@ -1,19 +1,13 @@
 package lsn.javassit.nzh.com.javassit;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.os.Bundle;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nzh.plugin.api.BindView;
 
-import org.w3c.dom.Text;
 
-import java.util.List;
-
+import lsn.javassit.nzh.com.javassit.fragment.AFragment;
 import lsn.javassit.nzh.com.javassit.fragment.BlankFragment;
 
 public class Test29Activity extends BaseActivity {
@@ -31,10 +25,15 @@ public class Test29Activity extends BaseActivity {
         super.onResume();
         tv_test.setText("----onResume-----");
 
-        BlankFragment blankFragment = BlankFragment.newInstance("aaa","bbb");
+        BlankFragment blankFragment = BlankFragment.newInstance("aaa", "bbb");
         FragmentManager fragmentManager = getFragmentManager();
+
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_container,blankFragment);
+        transaction.replace(R.id.fragment_container, blankFragment);
+
+        AFragment aFragment = AFragment.newInstance();
+        transaction.replace(R.id.fragment_container2, aFragment);
+
         transaction.commit();
 
     }

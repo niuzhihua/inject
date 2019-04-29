@@ -3,18 +3,22 @@ package com.nzh.plugin
 import com.android.build.api.transform.DirectoryInput
 import com.android.build.api.transform.JarInput
 import com.android.build.api.transform.QualifiedContent
+import com.android.build.api.transform.Status
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
+import com.android.build.api.transform.TransformOutputProvider
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.ide.common.internal.WaitableExecutor
+import com.android.utils.FileUtils
 import com.nzh.plugin.inject.InjectView2
 import com.nzh.plugin.util.Util
-import groovy.xml.Namespace
 import javassist.ClassPool
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileTree
+
+import java.util.concurrent.Callable
 
 // 我们自己注册的Transform 优先于gradle 内置的 Transform来先执行。
 class MyTransform extends Transform {
@@ -26,43 +30,7 @@ class MyTransform extends Transform {
     MyTransform(Project project, AppExtension android) {
         this.android = android
         this.project = project
-        /*     def sdkDir = 'D:\\setup\\android_sdk\\android-sdk'
 
-             // 获取build生成目录
-             def buildDir = project.buildDir.absolutePath + File.separator + 'intermediates' + File.separator + 'classes' + File.separator + 'debug'
-
-     //        def androidJarPath = sdkDir + File.separator + 'platforms' + File.separator + android.compileSdkVersion + File.separator + 'android.jar'
-             def androidJarPath = sdkDir + File.separator + 'platforms' + File.separator + 'android-26' + File.separator + 'android.jar'
-
-             // 获取清单文件
-             def manifestFile = android.sourceSets.main.manifest.srcFile
-
-             // 解析清单文件
-             def parser = new XmlParser().parse(manifestFile)
-             def nameSpace = new Namespace('http://schemas.android.com/apk/res/android', 'android')
-             //获取application 节点
-             Node node = parser.application[0]
-             // 获取application下的四大组件等信息
-             List childs = node.children()
-             def packageName = 'lsn.javassit.nzh.com.javassit' // android.defaultConfig.applicationId
-             println('packageName:' + packageName)
-             ArrayList<String> activities = new ArrayList<>()
-             for (Node child : childs) {
-                 if ('activity'.equals(child.name())) {
-                     String activityName = child.attributes()[nameSpace.name]
-                     if (activityName.contains(packageName)) {
-                         activities.add(activityName)
-                     } else {
-                         activities.add(packageName + activityName)
-                     }
-                 }
-             }
-
-             println('buildDir:' + buildDir)
-             println('androidJarPath:' + androidJarPath)
-             println('activities:' + activities.size())
-             println('packageName:' + packageName)
-             init(buildDir, androidJarPath, activities, packageName)*/
     }
 
     String buildDir
@@ -76,7 +44,6 @@ class MyTransform extends Transform {
         this.androidLib = androidLib
         this.activityes = activityes
         this.packageName = packageName
-
         ClassPool pool = new ClassPool(true)//ClassPool.getDefault()
         pool.appendClassPath(buildDir)
         pool.appendClassPath(androidLib)
@@ -97,7 +64,12 @@ class MyTransform extends Transform {
      */
     @Override
     Set<QualifiedContent.ContentType> getInputTypes() {
+//        return TransformManager.CONTENT_CLASS
         return TransformManager.CONTENT_CLASS
+    }
+    @Override
+    Set<QualifiedContent.ContentType> getOutputTypes() {
+        return super.getOutputTypes();
     }
 
     /**
@@ -108,7 +80,7 @@ class MyTransform extends Transform {
      */
     @Override
     Set<? super QualifiedContent.Scope> getScopes() {
-        // TransformManager.SCOPE_FULL_INSTANT_RUN_PROJECT
+//         return  TransformManager.SCOPE_FULL_INSTANT_RUN_PROJECT
         // 处理范围：整个工程 所有的getInputTypes()都会交给 我们自定义的MyTransform来处理
 //        TransformManager.SCOPE_FULL_PROJECT :
 //        TransformManager.SCOPE_FULL_WITH_IR_FOR_DEXING
@@ -119,71 +91,71 @@ class MyTransform extends Transform {
     boolean isIncremental() {
         return false
     }
+    private WaitableExecutor waitableExecutor = WaitableExecutor.useGlobalSharedThreadPool();
 
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
         super.transform(transformInvocation)
 
-        println '---执行自定义transform------'
 
-        // 获取transform所有的输入
-        Collection<TransformInput> inputs = transformInvocation.getInputs()
+        //当前是否是增量编译
+        boolean isIncremental = transformInvocation.isIncremental();
+        //消费型输入，可以从中获取jar包和class文件夹路径。需要输出给下一个任务
+        Collection<TransformInput> inputs = transformInvocation.getInputs();
 
-        // 从inputs 中又可以拿到2个输入： 目录输入 , (jar)文件输入
-
-        for (TransformInput input : inputs) {
-
-            // 我们自己写的代码的输入。
-            Collection<DirectoryInput> dirInputs = input.getDirectoryInputs()
-            dirInputs.each {
-                println('dirInputs name:' + it.name + "-path:" + it.file.absolutePath)
-
+        //OutputProvider管理输出路径，如果消费型输入为空，你会发现OutputProvider == null
+        TransformOutputProvider outputProvider = transformInvocation.getOutputProvider();
+        for(TransformInput input : inputs) {
+        /*    for(JarInput jarInput : input.getJarInputs()) {
+                File dest = outputProvider.getContentLocation(
+                        jarInput.getFile().getAbsolutePath(),
+                        jarInput.getContentTypes(),
+                        jarInput.getScopes(),
+                        Format.JAR);
+                //将修改过的字节码copy到dest，就可以实现编译期间干预字节码的目的了
+                FileUtils.copyFile(jarInput.getFile(), dest);
+            }*/
+            for(DirectoryInput directoryInput : input.getDirectoryInputs()) {
+                File dest = outputProvider.getContentLocation(directoryInput.getName(),
+                        directoryInput.getContentTypes(), directoryInput.getScopes(),
+                        Format.DIRECTORY);
+                //将修改过的字节码copy到dest，就可以实现编译期间干预字节码的目的了
+               // FileUtils.copyDirectory(directoryInput.getFile(), dest);
             }
-
-            // 所有的jar输入，包括第三方jar. 除了我们自己写的代码之外，
-            Collection<JarInput> jarInputs = input.jarInputs
-            jarInputs.each {
-
-            }
-
         }
+    }
 
-//        TransformOutputProvider outputProvider = transformInvocation.outputProvider
-//
-//        transformInvocation.inputs.each {
-//            // 处理 DirectoryInput 集合
-//            it.directoryInputs.each {
-//                print it.file.absolutePath
-//
-//                File fromFile = it.file
-//                // 把 自己 修改后的class 写入到 transform 的输入目录
-//                //                writeMyClass(fromFile.absolutePath)
-//                writeMyClass()
-//
-//                println('it.file:' + it.file)
-//                String name = it.name
-//                Set<QualifiedContent.ContentType> contenttyps = it.contentTypes
-//                Set<? super QualifiedContent.Scope> scopes = it.scopes
-//
-//                File toFile = outputProvider.getContentLocation(name, contenttyps, scopes, Format.DIRECTORY)
-//
-//                FileUtils.copyDirectory(fromFile, toFile)
-//
-//            }
-//
-//                   it.jarInputs.each {
-//
-//                        String name = it.name
-//                        Set<QualifiedContent.ContentType> contenttyps = it.contentTypes
-//                        Set<? super QualifiedContent.Scope> scopes = it.scopes
-//                        File fromFile = it.file
-//
-//                        File toFile = outputProvider.getContentLocation(name, contenttyps, scopes, Format.JAR)
-//
-//                        FileUtils.copyFile(fromFile, toFile)
-//                    }
-//        }
-
+    void dealIncremental(boolean isIncremental, JarInput jarInput, File dest) {
+        if (isIncremental) {
+            //处理增量编译
+            switch (jarInput.status) {
+                case Status.NOTCHANGED:
+                    break
+                case Status.ADDED:
+                case Status.CHANGED:
+                    //处理有变化的
+                    if (jarInput.status == Status.CHANGED) {
+                        //Changed的状态需要先删除之前的
+                        if (dest.exists()) {
+//                                            FileUtils.forceDelete(dest)
+                            FileUtils.delete(dest)
+                        }
+                    }
+                    FileUtils.copyFile(jarInput.getFile(), dest)
+                    break
+                case Status.REMOVED:
+                    //移除Removed
+                    if (dest.exists()) {
+                        //   FileUtils.forceDelete(dest)
+                        FileUtils.delete(dest)
+                    }
+                    break
+            }
+        } else {
+            //不处理增量编译
+            //将修改过的字节码copy到dest，就可以实现编译期间干预字节码的目的了
+            FileUtils.copyFile(jarInput.getFile(), dest);
+        }
     }
 
     void writeMyClass() {

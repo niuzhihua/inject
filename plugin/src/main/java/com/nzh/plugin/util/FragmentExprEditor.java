@@ -35,13 +35,20 @@ public class FragmentExprEditor extends ExprEditor {
     public void edit(MethodCall c) throws CannotCompileException {
         super.edit(c);
 
-        if ("bind".equals(c.getMethodName()) &&
+     /*   if ("bind".equals(c.getMethodName()) &&
                 "lsn.javassit.nzh.com.javassit.fragment.MyInjector".equals(c.getClassName())) {
 
-//            c.replace("{" + METHOD_NAME + "($$);}");
             // 插入调用
             c.replace("{$_ = $proceed($$); " + METHOD_NAME + "($_);}");
-            //  ctMethod.insertAt(c.getLineNumber() + 1, METHOD_NAME + "($proceed($$));");
+
+            // 可以重复修改
+              ctClass.debugWriteFile(buildClasspath);
+        }*/
+        if ("inflate".equals(c.getMethodName()) &&
+                "android.view.LayoutInflater".equals(c.getClassName())) {
+
+            // 插入调用
+            c.replace("{$_ = $proceed($$); " + METHOD_NAME + "($_);}");
 
             // 可以重复修改
               ctClass.debugWriteFile(buildClasspath);

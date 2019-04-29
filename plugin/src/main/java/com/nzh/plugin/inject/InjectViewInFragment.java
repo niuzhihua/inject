@@ -112,37 +112,18 @@ public class InjectViewInFragment {
 
             } catch (NotFoundException e) {
 //                e.printStackTrace();
-                //4.2 ： 有异常表示 直接父类 不是 (Activity 或者 AppCompatActivity )
-                System.err.println(e.getMessage() + "\r\n 父类中注入");
+                //改方案 ： 有异常表示 直接父类 不是 (Activity 或者 AppCompatActivity )
+                // 可以在这里添加 METHOD_OnCreateView 方法。genOnCreateViewMethod
+                System.err.println("重写" + METHOD_OnCreateView + "方法注入：");
 
-                CtClass[] params = new CtClass[1];
-                params[0] = pool.get("android.os.Bundle");
-
-                // 在父类中 添加 初始化view方法的 声明和调用
-                ArrayList<String> superClassNames = getSuperClassIncludeSetContentView(ctClass, METHOD_OnCreate, params, buildClassDir);
-
-                for (String s : superClassNames) {
-                    System.out.println("superClassNames--->" + s);
-                    // 保证父类只注入一边
-                    if (SuperClassExprEditor.isAlreadyAdd) {
-                        break;
-                    }
-                    final CtClass superClass = pool.get(s);
-                    try {
-                        final CtMethod method = superClass.getDeclaredMethod(METHOD_OnCreate, params);
-                        SuperClassExprEditor exprEditor = new SuperClassExprEditor(superClass, method, buildClassDir);
-                        method.instrument(exprEditor);
-                    } catch (Exception e1) {
-                        System.out.println(e1.getMessage());
-                    }
-                }
-
-
+                genMethodByNewMethod(ctClass, getOnCreateViewMethodString(list));
                 //5：父类中写入初始化view方法的 声明和调用。
                 //  不要忘记写入
                 ctClass.debugWriteFile(myClassPath);
                 ctClass.defrost();
                 continue;
+            }finally {
+                list.clear();
             }
 
             // 4.1 在OnCreateView 方法中 添加 初始化view 方法的调用
@@ -152,40 +133,30 @@ public class InjectViewInFragment {
         }
     }
 
-    /**
-     * 从currentCtClass 向上查找父类 。 在包含onCreate 方法的父类中 注入方法。
-     *
-     * @param currentCtClass 当前activity
-     * @param methodName     onCreate 方法
-     * @param param          onCreate 方法参数
-     * @return 找到的父类
-     */
-    private ArrayList<String> getSuperClassIncludeSetContentView(CtClass currentCtClass, String methodName, CtClass[] param, final String buildClassDir) {
-        ArrayList<String> list = new ArrayList<>();
-        CtClass tempBase = null;
-        String superClassName = null;
-        try {
-            tempBase = currentCtClass.getSuperclass();
-            superClassName = tempBase.getName();
-            while (!"android.app.Activity".equals(superClassName)) {
-                list.add(superClassName);
-                tempBase = tempBase.getSuperclass();
-                superClassName = tempBase.getName();
-            }
-//            System.out.println("---->" + ctClass.getName());
-//            final CtMethod method = ctClass.getDeclaredMethod(methodName, param);
-//            if (METHOD_OnCreate.equals(method.getName())) {
-//                return ctClass.getName();
-//            } else {
-//                return getSuperClassIncludeSetContentView(ctClass, methodName, param, buildClassDir);
-//            }
-        } catch (Exception e) {
-            System.out.println("ignore--getSuperClassIncludeSetContentView---:" + e.getMessage());
-            return list;
-        }
-        return list;
-    }
 
+    public String getOnCreateViewMethodString(ArrayList<MyFieldInfo> viewInfos) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("public android.view.View onCreateView(android.view.LayoutInflater inflater, android.view.ViewGroup container, android.os.Bundle savedInstanceState) {\r\n")
+                .append("android.view.View v =  super.onCreateView(inflater, container, savedInstanceState);\r\n");
+
+        for (MyFieldInfo f : viewInfos) {
+            String name = f.getFieldViewName();
+            String type = f.getFieldViewType();
+
+            int id = f.getFieldViewId();
+
+            sb.append(name).
+                    append("=").append("(").append(type).append(")").
+                    append(NZH_Gen_Method_Body).append(id).append(");").append("\r\n");
+
+        }
+        sb.append("return v;\r\n");
+        sb.append("}");
+
+        System.out.println("viewInfos" + viewInfos.size());
+        System.out.println(sb.toString());
+        return sb.toString();
+    }
 
     public String getMethodString2(ArrayList<MyFieldInfo> viewInfos, String methodName, String packageName) {
 
@@ -210,7 +181,6 @@ public class InjectViewInFragment {
                         append(NZH_Gen_Method_Body).append(idValue).append(");").append("\r\n");
             }
         }
-        viewInfos.clear();
         String methodContent = sb.toString();
         String s = "public void " + methodName + "{#}";
         String method = s.replaceAll("#", methodContent);

@@ -1,5 +1,6 @@
 package lsn.javassit.nzh.com.javassit;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +10,7 @@ import android.widget.TextView;
 
 import com.nzh.plugin.api.BindView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
 
     @BindView(R.id.tv)

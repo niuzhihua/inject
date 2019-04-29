@@ -3,6 +3,7 @@ package lsn.javassit.nzh.com.javassit;
 import android.app.Activity;
 import android.os.Trace;
 import android.support.annotation.IdRes;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +14,7 @@ import android.widget.Toast;
 import com.nzh.plugin.api.BindView;
 import com.nzh.plugin.api.OnClick;
 
-public class Test4Activity extends Activity implements View.OnClickListener{
+public class Test4Activity extends FragmentActivity implements View.OnClickListener{
 
     @BindView(R.id.text)
     TextView textView;

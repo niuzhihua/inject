@@ -12,14 +12,14 @@
 
 3：使用介绍：
 
-    在 buildscript 的 classpath 中引入 插件：
+    在 工程的build.gradle 文件中的 buildscript 的 classpath 中引入 插件：
 
        classpath 'com.nzh.plugin:inject:1.1.6'
 
-    然后在application 插件所在module 使用插件：
+    然后在application 插件所在module 的build.gradle 中使用插件：
 
         apply plugin: 'com.android.application'
-        apply plugin: 'com.nzh.plugin'
+        apply plugin: 'com.nzh.plugin'    //
 
         dependencies {
             implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -28,10 +28,33 @@
             testImplementation 'junit:junit:4.12'
 
             // 引入依赖
-            provided 'com.nzh.plugin:inject:1.1.6'
+            provided 'com.nzh.plugin:inject:1.1.6'   //
         }
 
 4： 使用见 app module 下例子。
+
+        public class Test3Activity extends AppCompatActivity {
+
+            @BindView(R.id.name)
+            TextView mName;
+
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.activity_test3);
+
+                mName.setText("--Test3Activity extends Activity--");
+            }
+
+            @OnClick({R.id.btn,
+                    R.id.btn2})
+            public void test(View view) {
+
+            }
+
+        }
+
+       // 其他见：
         MainActivity extends Activity
         Test3Activity extends AppCompatActivity
         Test4Activity extends FragmentActivity

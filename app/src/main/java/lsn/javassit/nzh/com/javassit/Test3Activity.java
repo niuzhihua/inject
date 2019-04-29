@@ -21,10 +21,8 @@ public class Test3Activity extends AppCompatActivity {
     TextView mName;
 
     TextView test;
-
     String a = "test";
     int test2 = 10;
-
 
     Button button;
 
@@ -34,16 +32,12 @@ public class Test3Activity extends AppCompatActivity {
         setContentView(R.layout.activity_test3);
         mName.setText("Test3Activity extends Activity");
         mName.setText("我用了@BindView");
-
     }
-
 
     @OnClick({R.id.btn,
             R.id.btn2})
     public void test(View view) {
 
-
     }
-
 
 }

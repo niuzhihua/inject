@@ -7,7 +7,7 @@ def myArtifactid = 'inject'  // 这个名字必须和jcenter创建的仓库里�
 group 'com.nzh.plugin'
 def myversion = '1.1.6'
 def jcenter_login_name = 'nzh2018'
-def jcenter_api_key = '357e94f2332293ce63f189c7a7e09fcb03d9eb93'
+def jcenter_api_key = '*******************' //填写自己的apikey
 def vcs = 'https://github.com/niuzhihua/inject.git' //仓库地址，这就需要先上传(github)仓库.
 def describe = 'this is a gradle plugin to inject view in android.'
 def repo_name = 'gradle_plugin'

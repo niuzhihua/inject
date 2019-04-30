@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nzh.plugin.api.BindView;
 import com.nzh.plugin.api.OnClick;
@@ -15,7 +16,7 @@ import com.nzh.plugin.api.OnClick;
 import javassist.CtClass;
 import javassist.CtMethod;
 
-public class Test3Activity extends AppCompatActivity {
+public class Test3Activity extends AppCompatActivity implements View.OnClickListener {
 
     @BindView(R.id.name)
     TextView mName;
@@ -37,7 +38,11 @@ public class Test3Activity extends AppCompatActivity {
     @OnClick({R.id.btn,
             R.id.btn2})
     public void test(View view) {
-
+        Toast.makeText(this, "view.getId():" + String.valueOf(view.getId()), Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onClick(View v) {
+
+    }
 }

@@ -86,7 +86,7 @@ public class InjectView2 {
             String dstClass = activity;
             final CtClass ctClass = pool.get(dstClass);
 
-            String annotationClassName = BINDVIEW_ANNOTATION;
+//            String annotationClassName = BINDVIEW_ANNOTATION;
             String annotationMethodName = "value";
 
             //2: 遍历field ,找到 每个Activity类中的注解
@@ -123,8 +123,7 @@ public class InjectView2 {
 
 
                 if (annotationAttr != null) {
-                    System.out.println("annotationClassName"+annotationClassName);
-                    Annotation annotation = annotationAttr.getAnnotation(annotationClassName);
+                    Annotation annotation = annotationAttr.getAnnotation(BINDVIEW_ANNOTATION);
                     System.out.println("annotation"+(annotation==null));
 
                     IntegerMemberValue intValue = (IntegerMemberValue) annotation.getMemberValue(annotationMethodName);

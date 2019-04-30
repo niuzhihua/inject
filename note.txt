@@ -102,6 +102,7 @@
 
     3： 审核通过后 才能覆盖上传。
 
+
 9： 上传jcenter 后不能自动创建package 原因：
 
         1： add to jcenter 后 提示 ： package should include sources as part of the package
@@ -134,6 +135,21 @@ Your package lacks a valid VCS link and therefore we cannot approve your inclusi
 
     需要先将工程上传至一个有效的仓库（github）。 然后再填写 vcs地址 并上传。
 
+10.1： 上次jcenter 成功后 ，进入依赖没报错，但是运行项目时报错 如下：
+
+          if (annotationAttr != null) {
+          // 下面这一行报 空指针 异常。 正常情况下不可能报这个错误。
+
+            Annotation annotation = annotationAttr.getAnnotation(BINDVIEW_ANNOTATION);
+            System.out.println("annotation"+(annotation==null));
+
+            。。。。
+            }
+
+             猜测是由于没有download下最新的jcenter上的库导致的。于是清除gradle 缓存，再次运行就好了。
+              C盘用户\.gradle\caches\modules-2\files-2.1\com.nzh.plugin\inject\1.1.6
+
+              为了避免引入旧的包导致错误，建议在上次jcenter 成功后删除本地gradle 缓存。再运行项目。
 
 
 11 ：  插件的使用：

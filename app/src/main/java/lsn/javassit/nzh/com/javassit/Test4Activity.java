@@ -14,7 +14,7 @@ import android.widget.Toast;
 import com.nzh.plugin.api.BindView;
 import com.nzh.plugin.api.OnClick;
 
-public class Test4Activity extends FragmentActivity implements View.OnClickListener{
+public class Test4Activity extends FragmentActivity {
 
     @BindView(R.id.text)
     TextView textView;
@@ -48,8 +48,8 @@ public class Test4Activity extends FragmentActivity implements View.OnClickListe
         text5 = findViewById(R.id.text5);
         textView.setText("Test4Activity extends AppCompatActivity");
         textView.setText("---Test4Activity extends AppCompatActivity---");
-        textView4.setText("---textView4---");
-        textView8.setText("---textView8---");
+        textView4.setText("---点击textView4---");
+        textView8.setText("---点击textView8---");
         button.setText("---button---");
         text5.setText("---id 和 view 名称一样---");
 
@@ -57,20 +57,16 @@ public class Test4Activity extends FragmentActivity implements View.OnClickListe
         Trace.endSection();
     }
 
-    @OnClick({R.id.btn10,R.id.text4
+    @OnClick({R.id.btn10, R.id.text4
     })
     public void def(View view) {
-        Toast.makeText(this, "test", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "view" + view.getId(), Toast.LENGTH_SHORT).show();
     }
 
     @OnClick({R.id.text8
     })
     public void abc(View view) {
-        Toast.makeText(this, "test", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "view" + view.getId(), Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onClick(View v) {
-
-    }
 }

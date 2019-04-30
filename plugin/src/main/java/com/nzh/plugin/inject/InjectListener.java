@@ -64,7 +64,7 @@ public class InjectListener {
             final CtClass ctClass = pool.get(dstClass);
 
 
-            String annotationClassName = ONCLICK_ANNOTATION;
+//            String annotationClassName = ONCLICK_ANNOTATION;
             String annotationMethodName = "value";
 
             CtMethod[] methods = ctClass.getDeclaredMethods();
@@ -84,7 +84,7 @@ public class InjectListener {
                 if (annotationAttr == null) {
                     continue;
                 }
-                Annotation annotation = annotationAttr.getAnnotation(annotationClassName);
+                Annotation annotation = annotationAttr.getAnnotation(ONCLICK_ANNOTATION);
                 ArrayMemberValue memberValue = (ArrayMemberValue) annotation.getMemberValue(annotationMethodName);
                 MemberValue[] memberValues = memberValue.getValue();
                 // 添加id
@@ -207,7 +207,13 @@ public class InjectListener {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, List<Integer>> entry : set) {
             String methodName = entry.getKey();
-            sb.append(methodName).append("(").append("v").append(");").append("\r\n");
+            List<Integer> ids = entry.getValue();
+
+            for (int id : ids) {
+                sb.append("if(v.getId()==" + id + ")\r\n");
+                sb.append(methodName).append("(").append("v").append(");").append("\r\n");
+            }
+
         }
         return sb.toString();
     }

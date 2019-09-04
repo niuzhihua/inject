@@ -1,8 +1,12 @@
-1: 概述： 这是一个在原生开发中 初始化View的 的gradle 插件。 类 ButterKnife 的@BindView 功能。只不过用操作字节码的
+1: 概述： 这是一个在android 原生开发中 初始化View的 的gradle 插件。 类似  ButterKnife 框架 的@BindView 功能。只不过用操作字节码的
          方式来实现。  目前支持 在Activity 和 Fragment 中使用。其中：
 
-         Activity ： 支持@BindView 注解来初始化View。 支持@OnClick注解来给View设置onClickListener
-         Fragment :  支持@BindView 注解来初始化View。 @OnClick 功能还没写。
+         Activity ： 
+                  支持@BindView 注解来初始化View。
+                  支持@OnClick注解来给View设置onClickListener
+         Fragment :  
+                  支持@BindView 注解来初始化View。
+                  @OnClick 功能还没写。
 
 2： 使用条件：
 

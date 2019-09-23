@@ -62,3 +62,7 @@
 
         BlankFragment extends Fragment
         AFragment extends BaseFragment
+
+
+ 5：   /Tutorial_demo : javassist 一些基本使用的例子。
+        更多例子见 https://github.com/jboss-javassist/javassist/tree/master/sample

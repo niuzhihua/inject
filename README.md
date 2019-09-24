@@ -1,6 +1,6 @@
-#inject
+# inject
 
- 概述： 这是一个在android 原生开发中 初始化View的 的gradle 插件。 类似  ButterKnife 框架 的   @BindView 功能。只不过用操作字节码的方式来实现。  目前支持 在Activity 和 Fragment 中使用。   支持的功能如下：
+概述： 这是一个在android 原生开发中 初始化View的 的gradle 插件。 类似  ButterKnife 框架 的   @BindView 功能。只不过用操作字节码的方式来实现。  目前支持 在Activity 和 Fragment 中使用。   支持的功能如下：
 
          Activity ： 
                   支持@BindView 注解来初始化View。
@@ -15,7 +15,7 @@
      Android Gradle Plugin version 3.0+ | Android Gradle 插件 3.0 以上版本
 
 
-##Installation
+## Installation
 
 首先在application 插件所在module 的build.gradle 中引入插件：
 
@@ -57,7 +57,8 @@
 ```
 
 
-##Usage
+## Usage
+
 使用方式和ButterKnife一样，见 app module 下例子。
 
 ```
@@ -92,7 +93,8 @@
  BlankFragment extends Fragment
  AFragment extends BaseFragment
 
-##其他说明
+## 其他说明
+
 /Tutorial_demo 目录 :   javassist 一些基本使用的例子。
  更多例子见 
  https://github.com/jboss-javassist/javassist/tree/master/sample
